@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGPA Calculator For Nigerian Students</title>
+    <style>
+        #title{
+            text-align: center;
+           
+        }
+        h4{
+            color:blue;
+        }
+        #CGPA-calculator-class-buttons-container{
+            display:grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        .details-container{
+            display: grid;
+            grid-template-columns: 5fr 2fr 1.5fr 0.5fr;
+        }
+        .semester-details-heading-container{
+            display: grid;
+            grid-template-columns: 5fr 2fr 1.5fr 0.5fr;
+
+        }
+        .course-units-container{
+            display: flex;
+            flex-direction: column;
+        }
+        .courses-container{
+            display: flex;
+            flex-direction: column;
+        }
+        .grades-container{
+            display: flex;
+            flex-direction: column;
+
+        }
+        .grade-selection-container{
+            height: 100%;
+        }
+        .delete-specific-course-button-containers{
+            display: flex;
+            flex-direction: column;
+
+        }
+        .semester-button-container{
+            display:grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .delete-specific-course-button{
+            background-color: red;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="title">CGPA CALCULATOR FOR NIGERIAN STUDENTS (5.0 SCALE)</h1>
+    </header>
+    <main id="main-container">
+       
+        <div id="CGPA-calculator-class-buttons-container">
+            <button id="add-semester-button"> ADD SEMESTER</button>
+            <button id="remove-semester-button"> REMOVE SEMESTER</button>
+            <button id="calculate-CGPA-button"> CALCULATE CGPA</button>
+        </div>
+
+    </main>
+
+
+
+
+
+
+    <script>
+
+        class CGPACalculator{
+            constructor(){
+
+                this.currentYear = 1
+                this.semesters = [1,2]
+                this.currentSemester = 1
+                this.semesterAdded = []
+                this.yearsAdded= []
+
+                this.addSemesterButton = document.getElementById("add-semester-button")
+                this.addSemester = this.addSemester.bind(this)
+                this.addSemesterButton.addEventListener("click",this.addSemester)
+
+                this.removeSemesterButton = document.getElementById("remove-semester-button")
+                this.removeSemester = this.removeSemester.bind(this)
+                this.removeSemesterButton.addEventListener("click",this.removeSemester)
+
+                this.calculateCGPAButton = document.getElementById("calculate-CGPA-button")
+
+                this.year1Semester1 = new semester(this.currentYear,this.currentSemester)
+                this.semesterAdded.push(this.year1Semester1)
+
+            }
+       
+            switchSemester(){
+                if (this.currentSemester === this.semesters[0]){
+                    this.currentSemester = this.semesters[1]
+                }
+                else{
+                    this.currentSemester = this.semesters[0]
+                }
+            }
+
+            addSemester(){
+                this.switchSemester()
+                let newSemester = new semester(this.currentSemester,this.currentYear)
+                this.semesterAdded.push(newSemester)
+                if(this.currentSemester === 2){
+                    this.currentYear += 1
+
+                }
+            }
+
+            removeSemester(){
+                this.lastSemester = this.semesterAdded.pop()
+                this.lastSemester.DeleteAllCourses()
+                this.lastSemester.buttonsContainer.remove()
+                this.lastSemester.DetailsHeadingContainer.remove()
+                if(this.currentSemester === 1){
+                    this.lastSemester.currentSemesterContainer.remove()
+                    this.lastSemester.currentYearContainer.remove()
+
+                }
+                else{
+                    this.lastSemester.currentSemesterContainer.remove()
+
+                }
+                if(this.semesterAdded.length === 0){
+                    this.currentYear = 1
+                    this.semesters = [1,2]
+                    this.currentSemester = 0
+                    this.semesterAdded = []
+                }
+                
+            }
+
+        }
+
+        class semester{
+            constructor(semester,year){
+
+                this.semester = semester
+                this.year = year
+                
+                this.addCourseButton = document.createElement("button")
+                this.addCourseButton.setAttribute("id",`year${this.year}-semester${this.semester}-add-course-button`)
+                this.addCourseButton.textContent = "ADD COURSE"
+                this.addCourse = this.addCourse.bind(this)
+                this.addCourseButton.addEventListener("click",this.addCourse)
+
+
+                this.calculateGPAButton = document.createElement("button")
+                this.calculateGPAButton.setAttribute("id",`year${this.year}-semester${this.semester}-calculate-GPA-button`)
+                this.calculateGPAButton.textContent = "CALCULATE GPA"
+                this.calculateGPA = this.calculateGPA.bind(this)
+                this.calculateGPAButton.addEventListener("click",this.calculateGPA)
+
+                
+                this.DeleteAllCoursesButton = document.createElement("button")
+                this.DeleteAllCoursesButton.setAttribute("id",`year${this.year}-semester${this.semester}-delete-all-courses-button`)
+                this.DeleteAllCoursesButton.textContent = "DELETE ALL COURSES"
+                this.DeleteAllCourses = this.DeleteAllCourses.bind(this)
+                this.DeleteAllCoursesButton.addEventListener("click",this.DeleteAllCourses)
+
+                this.GPAContainer = document.createElement("div")
+                this.GPAContainer.setAttribute("id",`year${this.year}-semester${this.semester}-GPA-container`)
+
+                this.setUpSemesterDetailsContainer()
+                this.setUpSemesterButtonsContainer()
+
+            }
+
+            setUpSemesterDetailsHeadingContainer(){
+             
+                this.DetailsHeadingContainer = document.createElement("div")
+                this.DetailsHeadingContainer.setAttribute("class","semester-details-heading-container")
+
+                this.heading1 = document.createElement("h4")
+                this.heading1.textContent = "COURSE CODES"
+                this.heading2 = document.createElement("h4")
+                this.heading2.textContent = "CREDIT UNITS"
+                this.heading3 = document.createElement("h4")
+                this.heading3.textContent = "GRADES"
+                this.heading4 = document.createElement("h4")
+                this.heading4.textContent = ""
+
+                this.DetailsHeadingContainer.appendChild(this.heading1)
+                this.DetailsHeadingContainer.appendChild(this.heading2)
+                this.DetailsHeadingContainer.appendChild(this.heading3)
+                this.DetailsHeadingContainer.appendChild(this.heading4)
+
+                this.mainContainer.insertBefore(this.DetailsHeadingContainer,this.CGPAcalculatorButtonsContainer)
+
+            }
+
+            setUpSemesterDetailsContainer(){
+
+                this.mainContainer = document.getElementById("main-container")
+                this.CGPAcalculatorButtonsContainer = document.getElementById("CGPA-calculator-class-buttons-container")
+                
+                this.currentSemesterContainer = document.createElement("h2")
+                if(this.semester === 1){
+                    this.currentYearContainer = document.createElement("h2")
+                    this.currentYearContainer.textContent = `Year ${this.year}`
+                    this.mainContainer.insertBefore(this.currentYearContainer,this.CGPAcalculatorButtonsContainer)
+                    this.currentSemesterContainer.textContent = "First Semester"
+                }
+                else{
+                    this.currentSemesterContainer.textContent = "Second Semester"
+                }
+                
+                this.mainContainer.insertBefore(this.currentSemesterContainer,this.CGPAcalculatorButtonsContainer)
+
+                this.setUpSemesterDetailsHeadingContainer()
+
+                this.DetailsContainer = document.createElement("div")
+                this.DetailsContainer.setAttribute("id",`year${this.year}-semester${this.semester}-details-container`)
+                this.DetailsContainer.setAttribute("class", "details-container")
+
+                this.coursesContainer = document.createElement("div")
+                this.coursesContainer.setAttribute("id",`year${this.year}-semester${this.semester}-courses-container`)
+                this.coursesContainer.setAttribute("class","courses-container")
+                
+                this.courseContainer = document.createElement("input")
+                this.courseContainer.addEventListener("input",function(){
+                    this.value = this.value.toUpperCase()
+                })
+                this.courseContainer.setAttribute("class",`year${this.year}-semester${this.semester}-course-container`)
+                this.coursesContainer.appendChild(this.courseContainer)
+
+                this.courseUnitsContainer = document.createElement("div")
+                this.courseUnitsContainer.setAttribute("id",`year${this.year}-semester${this.semester}-course-units-container`)
+                this.courseUnitsContainer.setAttribute("class", "course-units-container")
+                
+                this.courseUnitContainer = document.createElement("input")
+                this.courseUnitContainer.setAttribute("class",`year${this.year}-semester${this.semester}-course-unit-container`)
+
+                this.courseUnitsContainer.appendChild(this.courseUnitContainer)
+
+                this.gradesContainer = document.createElement("div")
+                this.gradesContainer.setAttribute("id",`year${this.year}-semester${this.semester}-grades-container`)
+                this.gradesContainer.setAttribute("class","grades-container")
+                this.grades = ["A","B","C","D","E","F"]
+                this.gradeSelectionContainer = document.createElement("select")
+                this.gradeSelectionContainer.setAttribute("class",`year${this.year}-semester${this.semester}-grade-selection-container grade-selection-container`)
+                this.grades.forEach(element=>{
+                    let option = document.createElement("option")
+                    option.textContent = element
+                    this.gradeSelectionContainer.appendChild(option)
+                })
+                this.gradesContainer.appendChild(this.gradeSelectionContainer)
+
+                this.deleteSpecificCourseButtonsContainer = document.createElement("div")
+                this.deleteSpecificCourseButtonsContainer.setAttribute("id",`year${this.year}-semester${this.semester}-delete-specific-course-buttons-container`)
+                this.deleteSpecificCourseButtonsContainer.setAttribute("class", "delete-specific-course-buttons-container")
+
+                this.deleteSpecificCourseButton = document.createElement("button")
+                this.deleteSpecificCourseButton.setAttribute("class",`year${this.year}-semester${this.semester}-delete-specific-course-button delete-specific-course-button`)
+                this.deleteSpecificCourseButton.textContent = "Delete"
+
+                this.deleteSpecificCourseButtonsContainer.appendChild(this.deleteSpecificCourseButton)
+
+                this.DetailsContainer.appendChild(this.coursesContainer)
+                this.DetailsContainer.appendChild(this.courseUnitsContainer)
+                this.DetailsContainer.appendChild(this.gradesContainer)
+                this.DetailsContainer.appendChild(this.deleteSpecificCourseButtonsContainer)
+
+                this.mainContainer.insertBefore(this.DetailsContainer,this.CGPAcalculatorButtonsContainer)
+                this.mainContainer.insertBefore(this.GPAContainer,this.CGPAcalculatorButtonsContainer)
+
+            }
+            setUpSemesterButtonsContainer(){
+                this.buttonsContainer = document.createElement("div")
+                this.buttonsContainer.setAttribute("id",`year${this.year}-semester${this.semester}-button-container`)
+                this.buttonsContainer.setAttribute("class","semester-button-container")
+                this.buttonsContainer.appendChild(this.addCourseButton)
+                this.buttonsContainer.appendChild(this.calculateGPAButton)
+                this.buttonsContainer.appendChild(this.DeleteAllCoursesButton)
+                this.mainContainer.insertBefore(this.buttonsContainer,this.CGPAcalculatorButtonsContainer)
+            }
+            addCourse(){
+                let currentYearCurrentSemesterCoursesContainer = document.getElementById(`year${this.year}-semester${this.semester}-courses-container`)
+                let currentYearCurrentSemesterCourseUnitsContainer = document.getElementById(`year${this.year}-semester${this.semester}-course-units-container`)
+                let currentYearCurrentSemesterGradesContainer = document.getElementById(`year${this.year}-semester${this.semester}-grades-container`)
+                let currentYearCurrentSemesterDeleteSpecificCoursesContainer = document.getElementById(`year${this.year}-semester${this.semester}-delete-specific-course-buttons-container`)
+                let newCourseContainer = document.createElement("input")
+                newCourseContainer.addEventListener("input",function(){
+                    this.value = this.value.toLocaleUpperCase()
+                })
+                let newCourseUnitContainer = document.createElement("input")
+                newCourseUnitContainer.setAttribute("class",`year${this.year}-semester${this.semester}-course-unit-container`)
+                let newGradeContainer = document.createElement("select")
+                newGradeContainer.setAttribute("class",`year${this.year}-semester${this.semester}-grade-selection-container grade-selection-container`)
+                let grades = ["A","B","C","D","E","F"]
+                grades.forEach(element=>{
+                    let option = document.createElement("option")
+                    option.textContent = element
+                    newGradeContainer.appendChild(option)
+                })
+                newCourseContainer.setAttribute("class",`year${this.year}-semester${this.semester}-course-container`)
+                let newDeleteSpecificCourseContainer = document.createElement("button")
+                newDeleteSpecificCourseContainer.setAttribute("class",`year${this.year}-semester${this.semester}-delete-specific-course-button delete-specific-course-button`)
+                newDeleteSpecificCourseContainer.textContent = "Delete"
+
+                currentYearCurrentSemesterCoursesContainer.appendChild(newCourseContainer)
+                currentYearCurrentSemesterCourseUnitsContainer.appendChild(newCourseUnitContainer)
+                currentYearCurrentSemesterGradesContainer.appendChild(newGradeContainer)
+                currentYearCurrentSemesterDeleteSpecificCoursesContainer.appendChild(newDeleteSpecificCourseContainer)
+            }
+            calculateGPA(){
+
+                this.courseCodes = []
+                this.courseUnits = []
+                this.gradePoints = []
+                this.courseGrades = []
+                this.gpa = 0
+                
+                let totalGradePoints = []
+                let currentYearCurrentSemesterGrades = document.getElementsByClassName(`year${this.year}-semester${this.semester}-grade-selection-container`)
+                let currentYearCurrentSemesterCourseUnits = document.getElementsByClassName(`year${this.year}-semester${this.semester}-course-unit-container`)
+                
+                for(let i = 0;i < currentYearCurrentSemesterCourseUnits.length;i++){
+                    this.courseUnits.push(parseFloat(currentYearCurrentSemesterCourseUnits[i].value))
+                    switch(currentYearCurrentSemesterGrades[i].value){
+                        case "A":
+                            this.courseGrades.push("A")
+                            this.gradePoints.push(5)
+                            break
+                        case "B":
+                            this.courseGrades.push("B")
+                            this.gradePoints.push(4)
+                            break
+                        case "C":
+                            this.courseGrades.push("C")
+                            this.gradePoints.push(3)
+                            break
+                        case "D":
+                            this.courseGrades.push("D")
+                            this.gradePoints.push(2)
+                            break
+                        case "E":
+                            this.courseGrades.push("E")
+                            this.gradePoints.push(1)
+                            break
+                        default:
+                            this.courseGrades.push("F")
+                            this.gradePoints.push(0)
+                    }
+                    totalGradePoints.push(parseFloat(currentYearCurrentSemesterCourseUnits[i].value)*parseFloat(this.gradePoints[i]))
+                }
+                let totalGradePointsSum = totalGradePoints.reduce((accumulator,initialValue)=>accumulator + initialValue,0)
+                let totalCourseUnitsSum = this.courseUnits.reduce((accumulator,initialValue)=>accumulator + initialValue,0)
+                this.gpa = totalGradePointsSum / totalCourseUnitsSum
+                this.GPAContainer.textContent = `GPA: ${this.gpa}`
+              
+            }
+
+            DeleteAllCourses(){
+                let detailsContainer = document.getElementById(`.year${this.year}-semester${this.semester}-details-container`)
+                let courses = document.querySelectorAll(`.year${this.year}-semester${this.semester}-course-container`)
+                let courseUnits = document.querySelectorAll(`.year${this.year}-semester${this.semester}-course-unit-container`)
+                let grades = document.querySelectorAll(`.year${this.year}-semester${this.semester}-grade-selection-container`)
+                let deleteButtons = document.querySelectorAll(`.year${this.year}-semester${this.semester}-delete-specific-course-button`)
+                for(let i = 0; i < courses.length;i++){
+                    courses[i].remove()
+                    courseUnits[i].remove()
+                    grades[i].remove()
+                    deleteButtons[i].remove()
+
+                }
+                this.GPAContainer.textContent = ""
+              
+
+             
+                
+
+            }
+
+        }
+
+        CGPACalc = new CGPACalculator()
+    </script>
+</body>
+</html>
