@@ -55,6 +55,36 @@
             background-color: red;
             width: 100%;
         }
+
+        @media(max-width:768px){
+            body{
+                font-size: 12px;
+            }
+        
+            .details-container{
+                display: grid;
+                grid-template-columns:35vw 35vw 15vw 15vw;
+        }
+            .buttons-container{
+                width: 100vw;
+            }
+            
+            .semester-details-heading-container{
+                display: grid;
+                grid-template-columns:  35vw 35vw 15vw 15vw;
+            }
+
+            .delete-specific-course-button{
+                font-size: 11px;
+                height: 100%;
+            }
+
+          
+           
+
+         
+            
+        }
     </style>
 </head>
 <body>
@@ -63,7 +93,7 @@
     </header>
     <main id="main-container">
        
-        <div id="CGPA-calculator-class-buttons-container">
+        <div id="CGPA-calculator-class-buttons-container" class="buttons-container">
             <button id="add-semester-button"> ADD SEMESTER</button>
             <button id="remove-semester-button"> REMOVE SEMESTER</button>
             <button id="calculate-CGPA-button"> CALCULATE CGPA</button>
@@ -282,7 +312,7 @@
             setUpSemesterButtonsContainer(){
                 this.buttonsContainer = document.createElement("div")
                 this.buttonsContainer.setAttribute("id",`year${this.year}-semester${this.semester}-button-container`)
-                this.buttonsContainer.setAttribute("class","semester-button-container")
+                this.buttonsContainer.setAttribute("class","semester-button-container buttons-container")
                 this.buttonsContainer.appendChild(this.addCourseButton)
                 this.buttonsContainer.appendChild(this.calculateGPAButton)
                 this.buttonsContainer.appendChild(this.DeleteAllCoursesButton)
