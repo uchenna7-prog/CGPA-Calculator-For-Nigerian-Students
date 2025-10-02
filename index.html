@@ -7,6 +7,7 @@
     <style>
         #title{
             text-align: center;
+            color: blue;
            
         }
         h4{
@@ -73,7 +74,8 @@
                 display: grid;
                 grid-template-columns:  35vw 35vw 15vw 15vw;
             }
-
+
+           
 
           
            
@@ -106,12 +108,14 @@
 
         class CGPACalculator{
             constructor(){
-
+            
                 this.currentYear = 1
                 this.semesters = [1,2]
                 this.currentSemester = 1
                 this.semesterAdded = []
                 this.yearsAdded= []
+
+               
 
                 this.addSemesterButton = document.getElementById("add-semester-button")
                 this.addSemester = this.addSemester.bind(this)
@@ -122,9 +126,17 @@
                 this.removeSemesterButton.addEventListener("click",this.removeSemester)
 
                 this.calculateCGPAButton = document.getElementById("calculate-CGPA-button")
+                this.calculateCGPA = this.calculateCGPA.bind(this)
+                this.calculateCGPAButton.addEventListener("click",this.calculateCGPA)
 
                 this.year1Semester1 = new semester(this.currentYear,this.currentSemester)
                 this.semesterAdded.push(this.year1Semester1)
+
+                this.CGPAContainer = document.createElement("div")
+                this.CGPAContainer .style.fontWeight = "bold"
+                this.CGPAContainer .style.fontSize = "25px"
+
+                
 
             }
        
@@ -144,30 +156,90 @@
                 if(this.currentSemester === 2){
                     this.currentYear += 1
 
+
                 }
             }
 
             removeSemester(){
-                this.lastSemester = this.semesterAdded.pop()
-                this.lastSemester.DeleteAllCourses()
-                this.lastSemester.buttonsContainer.remove()
-                this.lastSemester.DetailsHeadingContainer.remove()
-                if(this.currentSemester === 1){
-                    this.lastSemester.currentSemesterContainer.remove()
-                    this.lastSemester.currentYearContainer.remove()
+                if(this.semesterAdded.length === 0){
+                    alert("No semester to remove")
+                }
+                else{
+                    let totalSemestersAdded = this.semesterAdded.length
+                    let lastIndex = totalSemestersAdded - 1
+                    let semesterToRemove = this.semesterAdded[lastIndex]
+                    this.semesterAdded.pop()
+                
+                    semesterToRemove.DeleteAllCourses()
+                    semesterToRemove.buttonsContainer.remove()
+                    semesterToRemove.DetailsHeadingContainer.remove()
+                    if(this.currentSemester === 1){
+                        semesterToRemove.currentSemesterContainer.remove()
+                        semesterToRemove.currentYearContainer.remove()
+                        semesterToRemove.GPAContainer.remove()
 
                 }
                 else{
-                    this.lastSemester.currentSemesterContainer.remove()
+                    semesterToRemove.currentSemesterContainer.remove()
+                    semesterToRemove.GPAContainer.remove()
 
                 }
                 if(this.semesterAdded.length === 0){
                     this.currentYear = 1
                     this.semesters = [1,2]
-                    this.currentSemester = 0
+                    this.currentSemester = 2
                     this.semesterAdded = []
                 }
+
+                }
+
+
                 
+               
+                
+            }
+
+            calculateCGPA(){
+                this.mainContainer = document.getElementById("main-container")
+                this.CGPAcalculatorButtonsContainer = document.getElementById("CGPA-calculator-class-buttons-container")
+              
+
+
+                this.allCourseUnits = []
+                this.allGradePoints = []
+                this.allTotalGradePoints = []
+
+                for(let i = 0;i < this.semesterAdded.length;i++){
+                    this.semesterAdded[i].storeDetails()
+                    let currentSemester = this.semesterAdded[i]
+                    for(let j = 0;j < currentSemester.courseUnits.length;j++){
+                        this.allCourseUnits.push(currentSemester.courseUnits[j])
+                        this.allGradePoints.push(currentSemester.gradePoints[j])
+
+                    }
+                }
+
+                for(let i = 0;i<this.allCourseUnits.length;i++){
+                    this.allTotalGradePoints.push(parseFloat(this.allCourseUnits[i])*parseFloat(this.allGradePoints[i]))
+                }
+
+                this.allTotalGradePointsSum = this.allTotalGradePoints.reduce((accumulator,initialValue)=>accumulator+initialValue,0)
+                this.allCourseUnitsSum = this.allCourseUnits.reduce((accumulator,initialValue)=>accumulator+initialValue,0)
+                this.CGPA = this.allTotalGradePointsSum / this.allCourseUnitsSum
+
+                if(isNaN(this.CGPA)){
+                    alert("Please make sure you enter numbers only in the course units column and fill all added fields.")
+                    this.CGPAContainer.textContent = ""
+                }
+                else{
+                    this.CGPAContainer.textContent = `CGPA: ${this.CGPA.toFixed(2)}`
+
+                }
+
+
+                this.mainContainer.insertBefore(this.CGPAContainer,this.CGPAcalculatorButtonsContainer)
+
+
             }
 
         }
@@ -177,6 +249,15 @@
 
                 this.semester = semester
                 this.year = year
+
+                this.courseNumber = 1
+
+                this.courseCodes = []
+                this.courseUnits = []
+                this.gradePoints = []
+                this.totalGradePoints = []
+                this.courseGrades = []
+                this.gpa = 0
                 
                 this.addCourseButton = document.createElement("button")
                 this.addCourseButton.setAttribute("id",`year${this.year}-semester${this.semester}-add-course-button`)
@@ -199,10 +280,15 @@
                 this.DeleteAllCoursesButton.addEventListener("click",this.DeleteAllCourses)
 
                 this.GPAContainer = document.createElement("div")
+                this.GPAContainer.style.fontWeight = "bold"
+                this.GPAContainer.style.fontSize = "25px"
+                
                 this.GPAContainer.setAttribute("id",`year${this.year}-semester${this.semester}-GPA-container`)
 
                 this.setUpSemesterDetailsContainer()
                 this.setUpSemesterButtonsContainer()
+
+                this.deleteSpecificRowEntry.bind(this)
 
             }
 
@@ -235,8 +321,8 @@
                 this.CGPAcalculatorButtonsContainer = document.getElementById("CGPA-calculator-class-buttons-container")
                 
                 this.currentSemesterContainer = document.createElement("h2")
+                this.currentYearContainer = document.createElement("h2")
                 if(this.semester === 1){
-                    this.currentYearContainer = document.createElement("h2")
                     this.currentYearContainer.textContent = `Year ${this.year}`
                     this.mainContainer.insertBefore(this.currentYearContainer,this.CGPAcalculatorButtonsContainer)
                     this.currentSemesterContainer.textContent = "First Semester"
@@ -258,9 +344,14 @@
                 this.coursesContainer.setAttribute("class","courses-container")
                 
                 this.courseContainer = document.createElement("input")
+                this.courseContainer.setAttribute("id",`year${this.year}-semester${this.semester}-course${this.courseNumber}`)
                 this.courseContainer.addEventListener("input",function(){
                     this.value = this.value.toUpperCase()
+                    
                 })
+            
+                this.courseContainer.setAttribute("placeholder","eg COS 102.2")
+                
                 this.courseContainer.setAttribute("class",`year${this.year}-semester${this.semester}-course-container`)
                 this.coursesContainer.appendChild(this.courseContainer)
 
@@ -269,6 +360,8 @@
                 this.courseUnitsContainer.setAttribute("class", "course-units-container")
                 
                 this.courseUnitContainer = document.createElement("input")
+                this.courseUnitContainer.setAttribute("placeholder","eg 3")
+                this.courseUnitContainer.setAttribute("id",`year${this.year}-semester${this.semester}-course-unit${this.courseNumber}`)
                 this.courseUnitContainer.setAttribute("class",`year${this.year}-semester${this.semester}-course-unit-container`)
 
                 this.courseUnitsContainer.appendChild(this.courseUnitContainer)
@@ -278,6 +371,7 @@
                 this.gradesContainer.setAttribute("class","grades-container")
                 this.grades = ["A","B","C","D","E","F"]
                 this.gradeSelectionContainer = document.createElement("select")
+                this.gradeSelectionContainer.setAttribute("id",`year${this.year}-semester${this.semester}-grade${this.courseNumber}`)
                 this.gradeSelectionContainer.setAttribute("class",`year${this.year}-semester${this.semester}-grade-selection-container grade-selection-container`)
                 this.grades.forEach(element=>{
                     let option = document.createElement("option")
@@ -290,11 +384,13 @@
                 this.deleteSpecificCourseButtonsContainer.setAttribute("id",`year${this.year}-semester${this.semester}-delete-specific-course-buttons-container`)
                 this.deleteSpecificCourseButtonsContainer.setAttribute("class", "delete-specific-course-buttons-container")
 
-                this.deleteSpecificCourseButton = document.createElement("button")
-                this.deleteSpecificCourseButton.setAttribute("class",`year${this.year}-semester${this.semester}-delete-specific-course-button delete-specific-course-button`)
-                this.deleteSpecificCourseButton.textContent = "Delete"
+                this.deleteSpecificCourseButton1 = document.createElement("button")
+                this.deleteSpecificCourseButton1.setAttribute("id",`year${this.year}-semester${this.semester}-delete-specific-course-button${this.courseNumber}`)
+                this.deleteSpecificCourseButton1.addEventListener("click",this.deleteSpecificRowEntry)
+                this.deleteSpecificCourseButton1.setAttribute("class",`year${this.year}-semester${this.semester}-delete-specific-course-button delete-specific-course-button`)
+                this.deleteSpecificCourseButton1.textContent = "Delete"
 
-                this.deleteSpecificCourseButtonsContainer.appendChild(this.deleteSpecificCourseButton)
+                this.deleteSpecificCourseButtonsContainer.appendChild(this.deleteSpecificCourseButton1)
 
                 this.DetailsContainer.appendChild(this.coursesContainer)
                 this.DetailsContainer.appendChild(this.courseUnitsContainer)
@@ -315,6 +411,7 @@
                 this.mainContainer.insertBefore(this.buttonsContainer,this.CGPAcalculatorButtonsContainer)
             }
             addCourse(){
+                this.courseNumber += 1
                 let currentYearCurrentSemesterCoursesContainer = document.getElementById(`year${this.year}-semester${this.semester}-courses-container`)
                 let currentYearCurrentSemesterCourseUnitsContainer = document.getElementById(`year${this.year}-semester${this.semester}-course-units-container`)
                 let currentYearCurrentSemesterGradesContainer = document.getElementById(`year${this.year}-semester${this.semester}-grades-container`)
@@ -324,9 +421,12 @@
                     this.value = this.value.toLocaleUpperCase()
                 })
                 let newCourseUnitContainer = document.createElement("input")
+                newCourseUnitContainer.setAttribute("id",`year${this.year}-semester${this.semester}-course-unit${this.courseNumber}`)
                 newCourseUnitContainer.setAttribute("class",`year${this.year}-semester${this.semester}-course-unit-container`)
+                newCourseUnitContainer.setAttribute("placeholder","eg 3")
                 let newGradeContainer = document.createElement("select")
                 newGradeContainer.setAttribute("class",`year${this.year}-semester${this.semester}-grade-selection-container grade-selection-container`)
+                newGradeContainer.setAttribute("id",`year${this.year}-semester${this.semester}-grade${this.courseNumber}`)
                 let grades = ["A","B","C","D","E","F"]
                 grades.forEach(element=>{
                     let option = document.createElement("option")
@@ -334,8 +434,12 @@
                     newGradeContainer.appendChild(option)
                 })
                 newCourseContainer.setAttribute("class",`year${this.year}-semester${this.semester}-course-container`)
+                newCourseContainer.setAttribute("placeholder","eg COS 102.2")
+                newCourseContainer.setAttribute("id",`year${this.year}-semester${this.semester}-course${this.courseNumber}`)
                 let newDeleteSpecificCourseContainer = document.createElement("button")
                 newDeleteSpecificCourseContainer.setAttribute("class",`year${this.year}-semester${this.semester}-delete-specific-course-button delete-specific-course-button`)
+                newDeleteSpecificCourseContainer.setAttribute("id",`year${this.year}-semester${this.semester}-delete-specific-course-button${this.courseNumber}`)
+                newDeleteSpecificCourseContainer.addEventListener("click",this.deleteSpecificRowEntry)
                 newDeleteSpecificCourseContainer.textContent = "Delete"
 
                 currentYearCurrentSemesterCoursesContainer.appendChild(newCourseContainer)
@@ -343,15 +447,13 @@
                 currentYearCurrentSemesterGradesContainer.appendChild(newGradeContainer)
                 currentYearCurrentSemesterDeleteSpecificCoursesContainer.appendChild(newDeleteSpecificCourseContainer)
             }
-            calculateGPA(){
-
+            storeDetails(){
                 this.courseCodes = []
                 this.courseUnits = []
                 this.gradePoints = []
+                this.totalGradePoints = []
                 this.courseGrades = []
                 this.gpa = 0
-                
-                let totalGradePoints = []
                 let currentYearCurrentSemesterGrades = document.getElementsByClassName(`year${this.year}-semester${this.semester}-grade-selection-container`)
                 let currentYearCurrentSemesterCourseUnits = document.getElementsByClassName(`year${this.year}-semester${this.semester}-course-unit-container`)
                 
@@ -382,35 +484,57 @@
                             this.courseGrades.push("F")
                             this.gradePoints.push(0)
                     }
-                    totalGradePoints.push(parseFloat(currentYearCurrentSemesterCourseUnits[i].value)*parseFloat(this.gradePoints[i]))
+                    this.totalGradePoints.push(parseFloat(currentYearCurrentSemesterCourseUnits[i].value)*parseFloat(this.gradePoints[i]))
                 }
-                let totalGradePointsSum = totalGradePoints.reduce((accumulator,initialValue)=>accumulator + initialValue,0)
+
+
+            
+            }
+
+            calculateGPA(){
+                this.storeDetails()
+                let totalGradePointsSum = this.totalGradePoints.reduce((accumulator,initialValue)=>accumulator + initialValue,0)
                 let totalCourseUnitsSum = this.courseUnits.reduce((accumulator,initialValue)=>accumulator + initialValue,0)
                 this.gpa = totalGradePointsSum / totalCourseUnitsSum
-                this.GPAContainer.textContent = `GPA: ${this.gpa}`
+                if(isNaN(this.gpa)){
+                    alert("Please make sure you enter numbers only in the course units column and fill all added fields.")
+                    this.GPAContainer.textContent = ""
+                }
+                else{
+                    this.GPAContainer.textContent = `GPA: ${this.gpa.toFixed(2)}`
+
+                }
+        
               
             }
 
             DeleteAllCourses(){
-                let detailsContainer = document.getElementById(`.year${this.year}-semester${this.semester}-details-container`)
-                let courses = document.querySelectorAll(`.year${this.year}-semester${this.semester}-course-container`)
-                let courseUnits = document.querySelectorAll(`.year${this.year}-semester${this.semester}-course-unit-container`)
-                let grades = document.querySelectorAll(`.year${this.year}-semester${this.semester}-grade-selection-container`)
-                let deleteButtons = document.querySelectorAll(`.year${this.year}-semester${this.semester}-delete-specific-course-button`)
-                for(let i = 0; i < courses.length;i++){
-                    courses[i].remove()
-                    courseUnits[i].remove()
-                    grades[i].remove()
-                    deleteButtons[i].remove()
-
-                }
+                let detailsContainer = document.getElementById(`year${this.year}-semester${this.semester}-details-container`)
+                detailsContainer.remove()
                 this.GPAContainer.textContent = ""
-              
-
-             
-                
-
             }
+
+
+            deleteSpecificRowEntry(){
+                let id = this.getAttribute("id")
+                let courseId = id.replace("delete-specific-course-button","course")
+                let courseUnitId = id.replace("delete-specific-course-button","course-unit")
+                let gradeId = id.replace("delete-specific-course-button","grade")
+
+                let deleteButton = document.getElementById(id)
+                let grade = document.getElementById(gradeId)
+                let course = document.getElementById(courseId)
+                let courseUnit = document.getElementById(courseUnitId)
+
+                deleteButton.remove()
+                grade.remove()
+                course.remove()
+                courseUnit.remove()
+                
+                
+    
+            }
+
 
         }
 
